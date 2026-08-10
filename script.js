@@ -23,47 +23,58 @@
   /* ---------------- Eyes that follow the cursor ---------------- */
   (function initEyeTracking() {
     const img = document.querySelector(".mascot");
-    const leftPupil = document.getElementById("eyePupilLeft");
-    const rightPupil = document.getElementById("eyePupilRight");
-    if (!img || !leftPupil || !rightPupil) return;
+    const sockets = {
+      left:  { socket: document.getElementById("eyeSocketLeft"),  pupil: document.getElementById("eyePupilLeft") },
+      right: { socket: document.getElementById("eyeSocketRight"), pupil: document.getElementById("eyePupilRight") }
+    };
+    if (!img || !sockets.left.socket || !sockets.right.socket) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Coordinates measured directly against the source artwork (1165x1350).
+    // Coordinates + sizes measured directly against the source artwork (1165x1350 natural size).
+    // hw/hh = half-width/half-height of the iris cover ellipse (in natural px).
     const NATURAL_W = 1165;
     const EYES = {
-      left:  { x: 727, y: 326, rx: 9, ry: 5, el: leftPupil },
-      right: { x: 875, y: 353, rx: 9, ry: 5, el: rightPupil }
+      left:  { x: 729, y: 330, hw: 19, hh: 12, ...sockets.left },
+      right: { x: 884, y: 350, hw: 20, hh: 12, ...sockets.right }
     };
-    const PUPIL_DIAMETER = 15; // px, at natural (1165-wide) scale
+    const PUPIL_DIAMETER = 15; // natural px, fits comfortably inside the iris cover
+    const MARGIN = 3;          // natural px kept clear so the pupil never touches the cover's edge
 
     let scale = 1;
 
     function layout() {
       scale = img.clientWidth / NATURAL_W;
       Object.values(EYES).forEach(e => {
-        const size = Math.max(4, PUPIL_DIAMETER * scale);
-        e.el.style.width = size + "px";
-        e.el.style.height = size + "px";
-        e.el.style.left = (e.x * scale) + "px";
-        e.el.style.top = (e.y * scale) + "px";
+        const w = e.hw * 2 * scale;
+        const h = e.hh * 2 * scale;
+        e.socket.style.width = w + "px";
+        e.socket.style.height = h + "px";
+        e.socket.style.left = (e.x * scale) + "px";
+        e.socket.style.top = (e.y * scale) + "px";
+
+        const pSize = Math.max(4, PUPIL_DIAMETER * scale);
+        e.pupil.style.width = pSize + "px";
+        e.pupil.style.height = pSize + "px";
       });
     }
 
     function pointAt(clientX, clientY) {
-      const rect = img.getBoundingClientRect();
       Object.values(EYES).forEach(e => {
+        const rect = img.getBoundingClientRect();
         const cx = rect.left + e.x * scale;
         const cy = rect.top + e.y * scale;
-        const rx = e.rx * scale;
-        const ry = e.ry * scale;
+        // clamp radius = iris half-size minus half the pupil minus a small margin,
+        // so the pupil always stays fully inside the static iris cover.
+        const rx = Math.max(0, e.hw * scale - (PUPIL_DIAMETER * scale) / 2 - MARGIN * scale);
+        const ry = Math.max(0, e.hh * scale - (PUPIL_DIAMETER * scale) / 2 - MARGIN * scale);
         let dx = clientX - cx;
         let dy = clientY - cy;
         const nx = rx ? dx / rx : 0;
         const ny = ry ? dy / ry : 0;
         const dist = Math.sqrt(nx * nx + ny * ny);
         if (dist > 1) { dx /= dist; dy /= dist; }
-        e.el.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+        e.pupil.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
       });
     }
 

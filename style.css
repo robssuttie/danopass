@@ -139,12 +139,19 @@ html[data-theme="dark"] #themeIconMoon{opacity:1; position:relative;}
   width:100%;
   height:auto;
 }
-.eye-pupil{
+.eye-socket{
   position:absolute;
   border-radius:50%;
-  background:radial-gradient(circle at 34% 30%, #757c8c 0%, #23262f 55%, #05060a 100%);
-  box-shadow:0 0 0 1px rgba(0,0,0,.12);
+  transform:translate(-50%, -50%);
+  background:radial-gradient(circle at 40% 35%, #aeb6c4 0%, #7d8494 32%, #4b5261 62%, #262a33 100%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.15);
   pointer-events:none;
+}
+.eye-pupil{
+  position:absolute;
+  top:50%; left:50%;
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #5b616e 0%, #1c1f26 55%, #050508 100%);
   transform:translate(-50%, -50%);
   transition:transform .05s linear;
   will-change:transform;
@@ -153,9 +160,9 @@ html[data-theme="dark"] #themeIconMoon{opacity:1; position:relative;}
   content:"";
   position:absolute;
   top:20%; left:22%;
-  width:30%; height:30%;
+  width:32%; height:32%;
   border-radius:50%;
-  background:rgba(255,255,255,.9);
+  background:rgba(255,255,255,.92);
 }
 .stone-password{
   position:absolute;
