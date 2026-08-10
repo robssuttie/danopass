@@ -35,6 +35,8 @@
 
     <div class="mascot-card">
       <img class="mascot" src="assets/dano.png" alt="DanoPass mascot — a friendly blue dinosaur with a human face, standing on a stone slab" width="1165" height="1350">
+      <span class="eye-pupil" id="eyePupilLeft" aria-hidden="true"></span>
+      <span class="eye-pupil" id="eyePupilRight" aria-hidden="true"></span>
       <div class="stone-password" id="passwordOutput" aria-live="polite">tap&nbsp;generate</div>
       <button id="copyBtn" class="copy-chip" type="button" aria-label="Copy password to clipboard" disabled>
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -63,7 +65,7 @@
         </span>
         <span class="switch-label">
           <span class="switch-title">Include a symbol</span>
-          <span class="switch-desc">adds one special character from a safe set</span>
+          <span class="switch-desc">adds one character from a safe set: ! @ # $ % &amp; * - +</span>
         </span>
       </label>
       <label class="switch-row">

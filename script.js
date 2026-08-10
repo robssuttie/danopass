@@ -20,6 +20,65 @@
     applyTheme(next);
   });
 
+  /* ---------------- Eyes that follow the cursor ---------------- */
+  (function initEyeTracking() {
+    const img = document.querySelector(".mascot");
+    const leftPupil = document.getElementById("eyePupilLeft");
+    const rightPupil = document.getElementById("eyePupilRight");
+    if (!img || !leftPupil || !rightPupil) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Coordinates measured directly against the source artwork (1165x1350).
+    const NATURAL_W = 1165;
+    const EYES = {
+      left:  { x: 727, y: 326, rx: 9, ry: 5, el: leftPupil },
+      right: { x: 875, y: 353, rx: 9, ry: 5, el: rightPupil }
+    };
+    const PUPIL_DIAMETER = 15; // px, at natural (1165-wide) scale
+
+    let scale = 1;
+
+    function layout() {
+      scale = img.clientWidth / NATURAL_W;
+      Object.values(EYES).forEach(e => {
+        const size = Math.max(4, PUPIL_DIAMETER * scale);
+        e.el.style.width = size + "px";
+        e.el.style.height = size + "px";
+        e.el.style.left = (e.x * scale) + "px";
+        e.el.style.top = (e.y * scale) + "px";
+      });
+    }
+
+    function pointAt(clientX, clientY) {
+      const rect = img.getBoundingClientRect();
+      Object.values(EYES).forEach(e => {
+        const cx = rect.left + e.x * scale;
+        const cy = rect.top + e.y * scale;
+        const rx = e.rx * scale;
+        const ry = e.ry * scale;
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+        const nx = rx ? dx / rx : 0;
+        const ny = ry ? dy / ry : 0;
+        const dist = Math.sqrt(nx * nx + ny * ny);
+        if (dist > 1) { dx /= dist; dy /= dist; }
+        e.el.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+      });
+    }
+
+    layout();
+    if (!img.complete) img.addEventListener("load", layout);
+    window.addEventListener("resize", layout);
+
+    if (!reduceMotion) {
+      window.addEventListener("mousemove", (e) => pointAt(e.clientX, e.clientY));
+      window.addEventListener("touchmove", (e) => {
+        if (e.touches && e.touches[0]) pointAt(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+    }
+  })();
+
   /* ---------------- Wiring ---------------- */
   const output = document.getElementById("passwordOutput");
   const copyBtn = document.getElementById("copyBtn");
