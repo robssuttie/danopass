@@ -36,7 +36,7 @@
     const NATURAL_W = 1165;
     const EYES = {
       left:  { x: 725, y: 328, hw: 17, hh: 11, ...sockets.left },
-      right: { x: 868, y: 343, hw: 16, hh: 10, ...sockets.right }
+      right: { x: 871, y: 347, hw: 20, hh: 13, ...sockets.right }
     };
     const PUPIL_DIAMETER = 11; // natural px, fits comfortably inside the iris cover
     const MARGIN = 2;          // natural px kept clear so the pupil never touches the cover's edge

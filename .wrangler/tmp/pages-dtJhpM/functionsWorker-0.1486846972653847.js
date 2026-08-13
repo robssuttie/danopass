@@ -187,7 +187,7 @@ async function onRequestGet(context) {
 }
 __name(onRequestGet, "onRequestGet");
 
-// ../.wrangler/tmp/pages-4qvPip/functionsRoutes-0.824551022727347.mjs
+// ../.wrangler/tmp/pages-dtJhpM/functionsRoutes-0.3627194182476541.mjs
 var routes = [
   {
     routePath: "/api/generate",
