@@ -23,20 +23,21 @@
   /* ---------------- Eyes that follow the cursor ---------------- */
   (function initEyeTracking() {
     const img = document.querySelector(".mascot");
-    const sockets = {
+    const eyeEls = {
       left:  { socket: document.getElementById("eyeSocketLeft"),  pupil: document.getElementById("eyePupilLeft") },
       right: { socket: document.getElementById("eyeSocketRight"), pupil: document.getElementById("eyePupilRight") }
     };
-    if (!img || !sockets.left.socket || !sockets.right.socket) return;
+    if (!img || !eyeEls.left.socket || !eyeEls.right.socket) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Coordinates + sizes measured directly against the source artwork (1165x1350 natural size).
-    // hw/hh = half-width/half-height of the iris cover ellipse (in natural px).
+    // hw/hh = half-width/half-height of the iris cover, measured along the eye's OWN tilted
+    // axes. rot = clockwise tilt of that axis in degrees (0 = perfectly horizontal).
     const NATURAL_W = 1165;
     const EYES = {
-      left:  { x: 725, y: 328, hw: 17, hh: 11, ...sockets.left },
-      right: { x: 871, y: 347, hw: 20, hh: 13, ...sockets.right }
+      left:  { x: 725, y: 328, hw: 17, hh: 11, rot: 0, ...eyeEls.left },
+      right: { x: 871, y: 345, hw: 17, hh: 10, rot: 8, ...eyeEls.right }
     };
     const PUPIL_DIAMETER = 11; // natural px, fits comfortably inside the iris cover
     const MARGIN = 2;          // natural px kept clear so the pupil never touches the cover's edge
@@ -52,29 +53,44 @@
         e.socket.style.height = h + "px";
         e.socket.style.left = (e.x * scale) + "px";
         e.socket.style.top = (e.y * scale) + "px";
+        e.socket.style.transform = `translate(-50%, -50%) rotate(${e.rot}deg)`;
 
         const pSize = Math.max(4, PUPIL_DIAMETER * scale);
         e.pupil.style.width = pSize + "px";
         e.pupil.style.height = pSize + "px";
+        e.pupil.style.left = (e.x * scale) + "px";
+        e.pupil.style.top = (e.y * scale) + "px";
       });
     }
 
     function pointAt(clientX, clientY) {
+      const rect = img.getBoundingClientRect();
       Object.values(EYES).forEach(e => {
-        const rect = img.getBoundingClientRect();
         const cx = rect.left + e.x * scale;
         const cy = rect.top + e.y * scale;
-        // clamp radius = iris half-size minus half the pupil minus a small margin,
-        // so the pupil always stays fully inside the static iris cover.
-        const rx = Math.max(0, e.hw * scale - (PUPIL_DIAMETER * scale) / 2 - MARGIN * scale);
-        const ry = Math.max(0, e.hh * scale - (PUPIL_DIAMETER * scale) / 2 - MARGIN * scale);
         let dx = clientX - cx;
         let dy = clientY - cy;
-        const nx = rx ? dx / rx : 0;
-        const ny = ry ? dy / ry : 0;
+
+        // Rotate the cursor offset into the eye's own (tilted) coordinate frame.
+        const rad = -e.rot * Math.PI / 180;
+        const cos = Math.cos(rad), sin = Math.sin(rad);
+        let localX = dx * cos - dy * sin;
+        let localY = dx * sin + dy * cos;
+
+        const rx = Math.max(0, e.hw * scale - (PUPIL_DIAMETER * scale) / 2 - MARGIN * scale);
+        const ry = Math.max(0, e.hh * scale - (PUPIL_DIAMETER * scale) / 2 - MARGIN * scale);
+        const nx = rx ? localX / rx : 0;
+        const ny = ry ? localY / ry : 0;
         const dist = Math.sqrt(nx * nx + ny * ny);
-        if (dist > 1) { dx /= dist; dy /= dist; }
-        e.pupil.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+        if (dist > 1) { localX /= dist; localY /= dist; }
+
+        // Rotate back out of the eye's local frame into real screen space.
+        const rad2 = e.rot * Math.PI / 180;
+        const cos2 = Math.cos(rad2), sin2 = Math.sin(rad2);
+        const finalX = localX * cos2 - localY * sin2;
+        const finalY = localX * sin2 + localY * cos2;
+
+        e.pupil.style.transform = `translate(-50%, -50%) translate(${finalX}px, ${finalY}px)`;
       });
     }
 
