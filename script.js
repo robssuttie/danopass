@@ -35,11 +35,11 @@
     // hw/hh = half-width/half-height of the iris cover ellipse (in natural px).
     const NATURAL_W = 1165;
     const EYES = {
-      left:  { x: 729, y: 330, hw: 19, hh: 12, ...sockets.left },
-      right: { x: 884, y: 350, hw: 20, hh: 12, ...sockets.right }
+      left:  { x: 725, y: 328, hw: 17, hh: 11, ...sockets.left },
+      right: { x: 868, y: 343, hw: 16, hh: 10, ...sockets.right }
     };
-    const PUPIL_DIAMETER = 15; // natural px, fits comfortably inside the iris cover
-    const MARGIN = 3;          // natural px kept clear so the pupil never touches the cover's edge
+    const PUPIL_DIAMETER = 11; // natural px, fits comfortably inside the iris cover
+    const MARGIN = 2;          // natural px kept clear so the pupil never touches the cover's edge
 
     let scale = 1;
 

@@ -1,0 +1,13 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/generate",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/generate.js:onRequestGet"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}
