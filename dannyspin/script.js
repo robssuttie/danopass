@@ -32,6 +32,7 @@
   const canvas = document.getElementById("wheelCanvas");
   const ctx = canvas.getContext("2d");
   const wheelWrap = document.getElementById("wheelWrap");
+  const wheelEmptyState = document.getElementById("wheelEmptyState");
 
   const winnerOverlay = document.getElementById("winnerOverlay");
   const winnerName = document.getElementById("winnerName");
@@ -116,17 +117,14 @@
     ctx.clearRect(0, 0, size, size);
 
     if (entries.length === 0) {
+      wheelEmptyState.hidden = false;
       ctx.beginPath();
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.fillStyle = "#D8DEE9";
       ctx.fill();
-      ctx.fillStyle = "#5B6786";
-      ctx.font = "600 15px Inter, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("Add names to build the wheel", cx, cy);
       return;
     }
+    wheelEmptyState.hidden = true;
 
     const n = entries.length;
     const sliceAngle = (Math.PI * 2) / n;
@@ -211,7 +209,10 @@
       spinning = false;
       spinBtn.disabled = entries.length < 2;
       spinHint.textContent = entries.length < 2 ? "Add at least 2 names to spin." : "";
-      announceWinner(entries[winnerIndex]);
+
+      wheelWrap.classList.add("celebrate");
+      setTimeout(() => wheelWrap.classList.remove("celebrate"), 750);
+      setTimeout(() => announceWinner(entries[winnerIndex]), 350);
     }
     canvas.addEventListener("transitionend", onDone);
   }
@@ -219,10 +220,17 @@
   spinBtn.addEventListener("click", spin);
 
   /* ---------------- Winner modal ---------------- */
+  const winFlash = document.getElementById("winFlash");
+
   function announceWinner(name) {
     winnerName.textContent = name;
     winnerOverlay.hidden = false;
     launchConfetti();
+
+    winFlash.classList.remove("fire");
+    // force reflow so the animation can restart if triggered again quickly
+    void winFlash.offsetWidth;
+    winFlash.classList.add("fire");
   }
 
   function closeWinner() {
@@ -248,28 +256,46 @@
   let confettiRAF = null;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  function makeBurst(originXFrac, delayMs, count) {
+    const originX = confettiCanvas.width * originXFrac;
+    const originY = confettiCanvas.height * 0.34;
+    const particles = [];
+    for (let i = 0; i < count; i++) {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI * 0.95);
+      const speed = 7 + Math.random() * 10;
+      particles.push({
+        x: originX + (Math.random() - 0.5) * 40,
+        y: originY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 5 + Math.random() * 6,
+        color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+        shape: Math.random() < 0.35 ? "circle" : "rect",
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.35,
+        delay: delayMs
+      });
+    }
+    return particles;
+  }
+
   function launchConfetti() {
     if (reduceMotion) return;
     confettiCanvas.width = window.innerWidth;
     confettiCanvas.height = window.innerHeight;
 
-    const colors = PALETTE;
-    const count = 140;
-    confettiParticles = Array.from({ length: count }, () => ({
-      x: confettiCanvas.width / 2 + (Math.random() - 0.5) * 200,
-      y: confettiCanvas.height * 0.35,
-      vx: (Math.random() - 0.5) * 11,
-      vy: -Math.random() * 9 - 4,
-      size: 5 + Math.random() * 5,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rot: Math.random() * Math.PI * 2,
-      vrot: (Math.random() - 0.5) * 0.3,
-      life: 0
-    }));
+    confettiParticles = [
+      ...makeBurst(0.5, 0, 130),
+      ...makeBurst(0.16, 130, 90),
+      ...makeBurst(0.84, 130, 90),
+      ...makeBurst(0.5, 320, 70)
+    ];
 
     if (confettiRAF) cancelAnimationFrame(confettiRAF);
-    const gravity = 0.28;
+    const gravity = 0.27;
+    const drag = 0.995;
     const start = performance.now();
+    const totalDuration = 4200;
 
     function tick(now) {
       const elapsed = now - start;
@@ -277,14 +303,17 @@
       let alive = false;
 
       confettiParticles.forEach(p => {
+        const localElapsed = elapsed - p.delay;
+        if (localElapsed < 0) { alive = true; return; }
+
         p.vy += gravity;
+        p.vx *= drag;
         p.x += p.vx;
         p.y += p.vy;
         p.rot += p.vrot;
-        p.life = elapsed;
         if (p.y < confettiCanvas.height + 40) alive = true;
 
-        const fade = Math.max(0, 1 - elapsed / 3200);
+        const fade = Math.max(0, 1 - localElapsed / 3000);
         if (fade <= 0) return;
 
         confettiCtx.save();
@@ -292,11 +321,17 @@
         confettiCtx.translate(p.x, p.y);
         confettiCtx.rotate(p.rot);
         confettiCtx.fillStyle = p.color;
-        confettiCtx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.6);
+        if (p.shape === "circle") {
+          confettiCtx.beginPath();
+          confettiCtx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+          confettiCtx.fill();
+        } else {
+          confettiCtx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.6);
+        }
         confettiCtx.restore();
       });
 
-      if (alive && elapsed < 3400) {
+      if (alive && elapsed < totalDuration) {
         confettiRAF = requestAnimationFrame(tick);
       } else {
         confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);

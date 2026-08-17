@@ -194,6 +194,34 @@ html[data-theme="dark"] #themeIconMoon{opacity:1; position:relative;}
   object-fit:cover;
   display:block;
 }
+.wheel-empty-state{
+  position:absolute;
+  top:66%;
+  left:50%;
+  transform:translate(-50%, 0);
+  width:70%;
+  margin:0;
+  text-align:center;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:600;
+  font-size:.92rem;
+  line-height:1.35;
+  color:var(--text-soft);
+  pointer-events:none;
+  z-index:3;
+  transition:opacity .2s ease;
+}
+.wheel-empty-state[hidden]{display:none;}
+
+/* pulses around the wheel the instant it stops, before the modal appears */
+.wheel-wrap.celebrate #wheelCanvas{
+  animation:wheelPulse .7s ease-out;
+}
+@keyframes wheelPulse{
+  0%{ box-shadow:var(--shadow), 0 0 0 6px var(--surface), 0 0 0 9px var(--border); }
+  35%{ box-shadow:var(--shadow), 0 0 0 6px var(--surface), 0 0 0 9px var(--orange-500), 0 0 40px 10px rgba(245,166,35,.65); }
+  100%{ box-shadow:var(--shadow), 0 0 0 6px var(--surface), 0 0 0 9px var(--border); }
+}
 
 .btn-spin{
   border:none;
@@ -296,20 +324,50 @@ html[data-theme="dark"] .entries-count{color:var(--blue-400);}
 }
 .modal-overlay[hidden]{display:none;}
 .winner-card{
+  position:relative;
   background:var(--surface);
   border-radius:24px;
-  padding:36px 32px;
+  padding:40px 32px 32px;
   max-width:380px;
   width:100%;
   text-align:center;
-  box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
-  animation:winnerPop .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 30px 70px -18px rgba(0,0,0,.55);
+  animation:winnerPop .5s cubic-bezier(.34,1.56,.64,1);
+  overflow:hidden;
 }
 @keyframes winnerPop{
-  from{ transform:scale(.8); opacity:0; }
-  to{ transform:scale(1); opacity:1; }
+  0%{ transform:scale(.6) rotate(-6deg); opacity:0; }
+  60%{ transform:scale(1.05) rotate(2deg); opacity:1; }
+  100%{ transform:scale(1) rotate(0deg); opacity:1; }
+}
+.winner-glow{
+  position:absolute;
+  top:50%; left:50%;
+  width:220%; height:220%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(245,166,35,.35), rgba(245,166,35,0) 60%);
+  animation:glowPulse 2.2s ease-in-out infinite;
+  pointer-events:none;
+  z-index:0;
+}
+@keyframes glowPulse{
+  0%,100%{ opacity:.5; transform:translate(-50%,-50%) scale(.9); }
+  50%{ opacity:1; transform:translate(-50%,-50%) scale(1.08); }
+}
+.winner-trophy{
+  position:relative;
+  z-index:1;
+  margin:0 0 4px;
+  font-size:2.6rem;
+  animation:trophyBounce .7s cubic-bezier(.34,1.56,.64,1) .15s both;
+}
+@keyframes trophyBounce{
+  0%{ transform:translateY(-30px) scale(.5); opacity:0; }
+  70%{ transform:translateY(4px) scale(1.1); opacity:1; }
+  100%{ transform:translateY(0) scale(1); opacity:1; }
 }
 .winner-eyebrow{
+  position:relative; z-index:1;
   margin:0 0 6px;
   font-size:.82rem;
   font-weight:700;
@@ -318,13 +376,25 @@ html[data-theme="dark"] .entries-count{color:var(--blue-400);}
   color:var(--orange-600);
 }
 .winner-name{
+  position:relative; z-index:1;
   font-family:'Space Grotesk', sans-serif;
   font-weight:700;
-  font-size:clamp(1.6rem, 6vw, 2.2rem);
+  font-size:clamp(1.7rem, 6.5vw, 2.4rem);
   margin:0 0 22px;
   word-break:break-word;
+  background:linear-gradient(100deg, var(--orange-600) 20%, var(--orange-400) 40%, #fff 50%, var(--orange-400) 60%, var(--orange-600) 80%);
+  background-size:250% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shine 2.4s linear infinite;
+}
+@keyframes shine{
+  0%{ background-position:200% 0; }
+  100%{ background-position:-200% 0; }
 }
 .winner-actions{
+  position:relative; z-index:1;
   display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
 }
 
@@ -334,6 +404,23 @@ html[data-theme="dark"] .entries-count{color:var(--blue-400);}
   width:100vw; height:100vh;
   pointer-events:none;
   z-index:60;
+}
+
+/* ---------- Win flash ---------- */
+.win-flash{
+  position:fixed; inset:0;
+  background:radial-gradient(circle at 50% 40%, rgba(255,235,190,.9), rgba(245,166,35,.35) 45%, rgba(245,166,35,0) 75%);
+  opacity:0;
+  pointer-events:none;
+  z-index:55;
+}
+.win-flash.fire{
+  animation:winFlash .6s ease-out;
+}
+@keyframes winFlash{
+  0%{ opacity:0; }
+  15%{ opacity:1; }
+  100%{ opacity:0; }
 }
 
 /* ---------- Focus / motion ---------- */
