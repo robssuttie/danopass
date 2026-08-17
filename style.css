@@ -81,6 +81,19 @@ html[data-theme="dark"] .bg-glow{
   letter-spacing:-.2px;
 }
 .brand .accent{color:var(--orange-500);}
+.topbar-right{display:flex; align-items:center; gap:16px;}
+.nav-link{
+  font-weight:600;
+  font-size:.85rem;
+  color:var(--text-soft);
+  text-decoration:none;
+  padding:6px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  transition:color .15s ease, border-color .15s ease;
+  white-space:nowrap;
+}
+.nav-link:hover{color:var(--blue-600); border-color:var(--blue-500);}
 
 .theme-toggle{background:none; border:none; padding:0; cursor:pointer;}
 .theme-toggle-track{
@@ -292,6 +305,8 @@ button:focus-visible{outline:2px solid var(--orange-500); outline-offset:3px;}
 /* ---------- Responsive ---------- */
 @media (max-width:420px){
   .buttons{grid-template-columns:1fr;}
+  .nav-link{font-size:.72rem; padding:5px 9px;}
+  .topbar-right{gap:10px;}
 }
 
 /* ---------- Reduced motion ---------- */
