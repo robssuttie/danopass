@@ -255,6 +255,13 @@ html[data-theme="dark"] #themeIconMoon{opacity:1; position:relative;}
   border-radius:18px;
   padding:18px;
   box-shadow:var(--shadow);
+  transition:opacity .2s ease;
+}
+.entries-card.locked{
+  opacity:.6;
+}
+.entries-card.locked .entries-textarea{
+  cursor:not-allowed;
 }
 .entries-head{
   display:flex; align-items:center; justify-content:space-between;
@@ -284,6 +291,7 @@ html[data-theme="dark"] .entries-count{color:var(--blue-400);}
   padding:12px 14px;
 }
 .entries-textarea:focus{outline:2px solid var(--blue-500); outline-offset:1px;}
+.entries-textarea:disabled{opacity:.7;}
 
 .entries-actions{
   display:flex; flex-wrap:wrap; gap:8px;
@@ -301,6 +309,7 @@ html[data-theme="dark"] .entries-count{color:var(--blue-400);}
   transition:border-color .15s ease, color .15s ease;
 }
 .btn-chip:hover{border-color:var(--blue-500); color:var(--blue-600);}
+.btn-chip:disabled{opacity:.5; cursor:not-allowed; border-color:var(--border); color:var(--text-soft);}
 .btn-chip-danger:hover{border-color:#e0554b; color:#e0554b;}
 
 /* ---------- Footer ---------- */

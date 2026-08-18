@@ -169,6 +169,16 @@
     drawWheel();
   });
 
+  const entriesTextareaEl = entriesInput;
+
+  function setEntriesLocked(locked) {
+    entriesTextareaEl.disabled = locked;
+    shuffleBtn.disabled = locked;
+    sampleBtn.disabled = locked;
+    clearBtn.disabled = locked;
+    document.querySelector(".entries-card").classList.toggle("locked", locked);
+  }
+
   /* ---------------- Spin logic ---------------- */
   function pickWinnerIndex(n) {
     const buf = new Uint32Array(1);
@@ -181,6 +191,7 @@
     spinning = true;
     spinBtn.disabled = true;
     spinHint.textContent = "Spinning…";
+    setEntriesLocked(true);
 
     const n = entries.length;
     const sliceAngleDeg = 360 / n;
@@ -209,6 +220,7 @@
       spinning = false;
       spinBtn.disabled = entries.length < 2;
       spinHint.textContent = entries.length < 2 ? "Add at least 2 names to spin." : "";
+      setEntriesLocked(false);
 
       wheelWrap.classList.add("celebrate");
       setTimeout(() => wheelWrap.classList.remove("celebrate"), 750);
